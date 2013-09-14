@@ -53,8 +53,8 @@ server {
       #  return 403;
       #}
 
-      # let NGINX serve images
-      location ~* \.(gif|png|jpg|jpeg|bmp|tif|tiff)$ { try_files $uri =404; }
+      # let NGINX serve images and CSS
+      location ~* \.(gif|png|jpg|jpeg|bmp|tif|tiff|css)$ { try_files $uri =404; }
       location ~ /_optimized/ { try_files $uri =404; }
 
       # attachments must go through the rails application to get the right content-disposition header
