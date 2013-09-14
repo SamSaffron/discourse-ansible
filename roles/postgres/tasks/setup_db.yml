@@ -1,0 +1,25 @@
+---
+- name: postgres | create discourse_production database
+  postgresql_db: db=discourse_production
+                 encoding='UTF-8'
+                 lc_collate='en_US.UTF-8'
+                 lc_ctype='en_US.UTF-8'
+                 template='template0'
+
+- name: postgres | create discourse user
+  postgresql_user: db=discourse_production
+                   name=discourse
+                   password={{postgres_discourse_password}}
+                   priv=ALL
+
+- name: postgres | grant privileges
+  postgresql_privs: database=discourse_production
+                    type=table
+                    roles=discourse
+                    objs=ALL_IN_SCHEMA
+                    privs=ALL
+                    grant_option=no
+                    state=present
+
+- name: postgres | install hstore extension
+  command: psql -d discourse_production -c "CREATE EXTENSION IF NOT EXISTS hstore;"

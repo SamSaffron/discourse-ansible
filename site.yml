@@ -1,0 +1,31 @@
+---
+- hosts: all
+  sudo: True
+  roles:
+  - common
+
+- hosts: redis
+  sudo: True
+  roles:
+  - redis
+
+- hosts: nginx
+  sudo: True
+  roles:
+  - nginx
+
+- hosts: postgres
+  sudo: True
+  roles:
+  - postgres
+
+- hosts: postgres
+  sudo: True
+  sudo_user: postgres
+  tasks:
+  - include: roles/postgres/tasks/setup_db.yml
+
+- hosts: discourse
+  sudo: True
+  roles:
+  - discourse

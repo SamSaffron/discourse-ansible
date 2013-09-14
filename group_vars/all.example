@@ -1,0 +1,27 @@
+# If the domain name changes, all posts will need to be rebaked and
+# sidekiq will need to be restarted. 
+# Refer to roles/discourse/templates/database.yml for details.
+domain_name: discourse.hummingbird.me
+
+# password hashes can be generated using:
+#   openssl passwd -salt <salt> -1 <password>
+
+username: vikhyat
+password: <admin password hash>
+
+# discourse account password
+discourse_password: <discourse account password hash>
+
+# postgres vars
+postgres_user_password: <postgres account password hash>
+postgres_discourse_password: <discourse account postgres password>
+
+# rbenv stuff.
+rbenv_root: /usr/local/rbenv
+ruby_version: 2.0.0-p195
+
+ruby_gc_malloc_limit: 90000000
+num_webs: 2
+
+# Set to true for initial set up, false afterwards.
+load_seed_data: True

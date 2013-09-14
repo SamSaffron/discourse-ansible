@@ -1,0 +1,68 @@
+---
+- name: discourse | fetch from git
+  git: repo=git://github.com/vikhyat/discourse.git
+       version=5d8cfd69f705b8d836b9ec050ba665ef6fa193ce
+       dest=/home/discourse/discourse
+  register: git_repo
+
+- name: discourse | set file permissions
+  file: path=/home/discourse/discourse
+        state=directory
+        recurse=yes
+        owner=discourse
+        group=discourse
+
+- name: discourse | copy config/database.yml
+  template: src=database.yml
+            dest=/home/discourse/discourse/config/database.yml
+            owner=discourse
+            group=discourse
+
+- name: discourse | copy config/redis.yml
+  template: src=redis.yml
+            dest=/home/discourse/discourse/config/redis.yml
+            owner=discourse
+            group=discourse
+
+- name: discourse | copy config/environments/production.rb
+  template: src=production.rb
+            dest=/home/discourse/discourse/config/environments/production.rb
+            owner=discourse
+            group=discourse
+
+- name: discourse | create pids and sockets directories
+  file: name=/home/discourse/$item
+        state=directory
+        owner=discourse
+        group=discourse
+  with_items:
+  - pids
+  - sockets
+  - log
+
+- name: discourse | loading seed data
+  command: /bin/su - discourse -c "cd /home/discourse/discourse && psql discourse_production < pg_dumps/production-image.sql"
+  only_if: ${load_seed_data}
+
+- name: discourse | bundle install
+  command: /bin/bash --login -c "cd /home/discourse/discourse && bundle install --deployment --without test"
+  only_if: ${git_repo.changed}
+
+- name: discourse | precompile assets
+  command: /bin/bash --login -c "cd /home/discourse/discourse && RUBY_GC_MALLOC_LIMIT={{ruby_gc_malloc_limit}} RAILS_ENV=production bundle exec rake assets:precompile"
+  only_if: ${git_repo.changed}
+
+- name: discourse | migrate database
+  command: /bin/bash --login -c "cd /home/discourse/discourse && RUBY_GC_MALLOC_LIMIT={{ruby_gc_malloc_limit}} RAILS_ENV=production bundle exec rake db:migrate"
+  #only_if: ${git_repo.changed}
+
+- name: discourse | copy monit config
+  template: src=monit
+            dest=/etc/monit/conf.d/discourse
+  register: discourse_monit_config
+
+- name: discourse | restart monit
+  service: name=monit state=restarted
+  only_if: ${discourse_monit_config.changed}
+
+

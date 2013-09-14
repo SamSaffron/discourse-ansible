@@ -1,0 +1,57 @@
+---
+- name: create admin user account
+  user: name={{username}} password={{password}} groups=sudo append=yes shell=/bin/bash
+
+- name: create discourse user account
+  user: name=discourse password={{discourse_password}} append=yes shell=/bin/bash
+
+- name: postgres | add apt signing key
+  apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc state=present
+
+- name: postgres | copy repository source file
+  template: src=pgdg.list dest=/etc/apt/sources.list.d/pgdg.list
+
+- name: update apt cache
+  apt: update_cache=yes
+
+- name: install required packages
+  apt: pkg=$item state=present
+  with_items:
+  - build-essential
+  - libssl-dev
+  - libyaml-dev
+  - git
+  - libtool
+  - libxslt1-dev
+  - libxml2-dev
+  - libpq-dev
+  - gawk
+  - curl
+  - pngcrush
+  - imagemagick
+  - python-software-properties
+  - vim
+  - ntp
+  - libpq-dev
+  - libpq5
+  - monit
+
+- name: copy monitrc
+  copy: src=monitrc dest=/etc/monit/monitrc
+  register: monitrc
+
+- name: restart monit
+  service: name=monit state=restarted
+  only_if: ${monitrc.changed}
+
+# Install Ruby.
+- include: rbenv.yml
+
+- name: set timezone to UTC
+  lineinfile: dest=/etc/timezone state=present insertbefore=BOF
+              regexp="^Etc/UTC" line="Etc/UTC"
+  register: timezone
+
+- name: reconfigure tzdata
+  shell: dpkg-reconfigure -f noninteractive tzdata
+  only_if: ${timezone.changed}

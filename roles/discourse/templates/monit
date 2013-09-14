@@ -1,0 +1,15 @@
+{% for i in range(num_webs) %}
+  check process thin.{{i}}
+    with pidfile /home/discourse/pids/thin.{{i}}.pid
+    group thins
+    group discourse
+    start program = "/bin/su - discourse -c 'cd /home/discourse/discourse && RUBY_GC_MALLOC_LIMIT={{ruby_gc_malloc_limit}} bundle exec thin start -e production -t 0 --socket /home/discourse/sockets/thin.{{i}}.sock --pid /home/discourse/pids/thin.{{i}}.pid --log /home/discourse/log/thin.{{i}}.log --daemonize'"
+    stop program = "/bin/su - discourse -c 'kill `cat /home/discourse/pids/thin.{{i}}.pid`'"
+
+{% endfor %}
+
+check process sidekiq
+  with pidfile /home/discourse/pids/sidekiq.pid
+  group discourse
+  start program = "/bin/su - discourse -c 'cd /home/discourse/discourse && RAILS_ENV=production RUBY_GC_MALLOC_LIMIT={{ruby_gc_malloc_limit}} bundle exec sidekiq --pidfile /home/discourse/pids/sidekiq.pid --logfile /home/discourse/log/sidekiq.log'"
+  stop program = "/bin/su - discourse -c 'cd /home/discourse/discourse && bundle exec sidekiqctl stop /home/discourse/pids/sidekiq.pid 60'"
