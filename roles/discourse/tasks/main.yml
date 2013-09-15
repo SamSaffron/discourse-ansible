@@ -48,13 +48,22 @@
   command: /bin/bash --login -c "cd /home/discourse/discourse && bundle install --deployment --without test"
   only_if: ${git_repo.changed}
 
+- name: discourse | copy plugins
+  sudo: no
+  local_action: command rsync -e ssh -a roles/discourse/files/plugins root@{{inventory_hostname}}:/home/discourse/discourse
+
+- name: discourse | set plugins permissions
+  file: path=/home/discourse/discourse/plugins
+        state=directory
+        recurse=yes
+        owner=discourse
+        group=discourse
+
 - name: discourse | precompile assets
   command: /bin/bash --login -c "cd /home/discourse/discourse && RUBY_GC_MALLOC_LIMIT={{ruby_gc_malloc_limit}} RAILS_ENV=production bundle exec rake assets:precompile"
-  only_if: ${git_repo.changed}
 
 - name: discourse | migrate database
   command: /bin/bash --login -c "cd /home/discourse/discourse && RUBY_GC_MALLOC_LIMIT={{ruby_gc_malloc_limit}} RAILS_ENV=production bundle exec rake db:migrate"
-  #only_if: ${git_repo.changed}
 
 - name: discourse | copy monit config
   template: src=monit
@@ -65,4 +74,5 @@
   service: name=monit state=restarted
   only_if: ${discourse_monit_config.changed}
 
-
+- name: discourse | restart application
+  shell: monit -g discourse restart
