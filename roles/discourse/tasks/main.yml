@@ -1,7 +1,7 @@
 ---
 - name: discourse | fetch from git
   git: repo=git://github.com/discourse/discourse.git
-       version=6183e9bb6ccdfac3ff7cec277755e3057224587f
+       version=16dc0a7001ac01ee44a1a191bbc4e6114984aa87
        dest=/home/discourse/discourse
   register: git_repo
 
