@@ -50,7 +50,7 @@
 
 - name: discourse | copy plugins
   sudo: no
-  local_action: command rsync -e ssh -a roles/discourse/files/plugins root@{{inventory_hostname}}:/home/discourse/discourse
+  local_action: command rsync -e ssh -a --delete roles/discourse/files/plugins root@{{inventory_hostname}}:/home/discourse/discourse
 
 - name: discourse | set plugins permissions
   file: path=/home/discourse/discourse/plugins
