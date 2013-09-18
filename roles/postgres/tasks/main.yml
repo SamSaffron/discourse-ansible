@@ -17,3 +17,19 @@
 - name: postgres | restarting
   service: name=postgresql state=restarted
   only_if: ${pg_hba.changed}
+
+- name: Create backups directory structure
+  file: path=$item state=directory owner=postgres
+  with_items:
+  - /home/discourse/pg_backups
+  - /home/discourse/pg_backups/daily
+  - /home/discourse/pg_backups/hourly
+
+- cron: name="daily pg backup"
+        hour=2 minute=50 user="postgres"
+        job='pg_dumpall | gzip > /home/discourse/pg_backups/daily/$(date "+\%Y_\%m_\%d-\%H_\%M_\%S.sql.gz")'
+
+- cron: name="hourly pg backup"
+        minute=20 user="postgres"
+        job='pg_dumpall | gzip > /home/discourse/pg_backups/hourly/$(date "+\%Y_\%m_\%d-\%H_\%M_\%S.sql.gz")'
+
