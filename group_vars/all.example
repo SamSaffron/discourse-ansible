@@ -25,3 +25,7 @@ num_webs: 2
 
 # Set to true for initial set up, false afterwards.
 load_seed_data: True
+
+# Discourse repository and commit to checkout.
+discourse_repo: git://github.com/discourse/discourse.git
+discourse_commit: aca567b4d7b9a7a654e12a5de35bee7d9c36e881
