@@ -44,10 +44,6 @@
   command: /bin/su - discourse -c "cd /home/discourse/discourse && psql discourse_production < pg_dumps/production-image.sql"
   only_if: ${load_seed_data}
 
-- name: discourse | bundle install
-  command: /bin/bash --login -c "cd /home/discourse/discourse && bundle install --deployment --without test"
-  only_if: ${git_repo.changed}
-
 - name: discourse | copy plugins
   sudo: no
   local_action: command rsync -e ssh -a --delete roles/discourse/files/plugins root@{{inventory_hostname}}:/home/discourse/discourse
@@ -58,6 +54,10 @@
         recurse=yes
         owner=discourse
         group=discourse
+
+- name: discourse | bundle install
+  command: /bin/bash --login -c "cd /home/discourse/discourse && bundle install --deployment --without test"
+  only_if: ${git_repo.changed}
 
 - name: discourse | precompile assets
   command: /bin/bash --login -c "cd /home/discourse/discourse && RUBY_GC_MALLOC_LIMIT={{ruby_gc_malloc_limit}} RAILS_ENV=production bundle exec rake assets:precompile"
