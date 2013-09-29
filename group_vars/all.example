@@ -3,6 +3,9 @@
 # Refer to roles/discourse/templates/database.yml for details.
 domain_name: discourse.hummingbird.me
 
+# NewRelic key
+newrelic_license_key: <newrelic license key>
+
 # password hashes can be generated using:
 #   openssl passwd -salt <salt> -1 <password>
 
