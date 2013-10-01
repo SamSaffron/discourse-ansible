@@ -4,7 +4,7 @@ production:
   username: discourse
   password: {{postgres_discourse_password}}
   host: localhost
-  pool: 5 # size of DB connection pool *per process*
+  pool: 25 # size of DB connection pool *per process*
   timeout: 5000
   # db_id: 0 (database ID if hosting multiple sites)
 
